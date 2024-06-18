@@ -1,0 +1,23 @@
+sudo apt-get install suricata
+sudo suricata-update
+default-rule-path: /etc/suricata/rules
+rule-files:
+  - emerging-all.rules
+sudo suricata -c /etc/suricata/suricata.yaml -i eth0
+input {
+  file {
+    path => "/var/log/suricata/eve.json"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+    codec => json
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["localhost:9200"]
+    index => "suricata-%{+YYYY.MM.dd}"
+  }
+}
+sudo systemctl start elasticsearch
+sudo systemctl start kibana
